@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcTestResultService.Protos";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+package testresult;
+
+message testresult
+{
+  int32 id = 1;
+  google.protobuf.Timestamp date = 2;
+  int32 TestType = 3; 
+  string Description = 4; 
+  int32 IdPatient = 5;
+}
+  
+message GetTestResultRequest 
+{
+  int32 id = 1;
+}
+message TestResultResponce
+{
+  repeated testresult testresult = 1;
+  
+}
+message CreateTestResultRequest
+{
+
+  int32 TestType = 1; 
+  string Description = 2; 
+  int32 PatientId = 3;
+}
+message UpdateTestResultRequest 
+{
+    int32 id = 1;
+  google.protobuf.Timestamp date = 2;
+  int32 TestType = 3; 
+  string Description = 4; 
+}
+message DeleteTestResultRequest
+{
+ int32 id = 1;
+}
+
+service TestResultProtoService
+{
+  rpc GetTestResult (GetTestResultRequest) returns (testresult);
+  rpc ListTestResult(google.protobuf.Empty) returns(TestResultResponce);
+  rpc CreateTestResult(CreateTestResultRequest) returns(testresult);
+  rpc UpdateTestResult(UpdateTestResultRequest) returns(testresult);
+  rpc DeleteTestResult(DeleteTestResultRequest) returns(google.protobuf.Empty);
+
+}

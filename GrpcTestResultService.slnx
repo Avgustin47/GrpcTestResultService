@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+  <Project Path="GrpcAutthorizationService/GrpcAutthorizationService.csproj" />
+  <Project Path="GrpcPdfService/GrpcPdfService.csproj" Id="633c72c9-a4c7-40b0-a347-7c3068a3f7b4" />
+  <Project Path="GrpcTestResultService/GrpcTestResultService.csproj" />
+  <Project Path="UserMqDto/UserMqDto.csproj" />
+</Solution>

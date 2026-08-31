@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcTestResultService";
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+package testtype;
+message testtype
+{
+	int32 id = 1;
+	string name = 2;
+	string descriprion = 3;
+	double price = 4;
+}
+
+message GetTestTypeRequest
+{
+ int32 id = 1;
+}
+message TestTypeResponce 
+{
+ repeated testtype testtype = 1;
+}
+
+message CreateTestTypeRequest
+{
+	string name = 1;
+	string descriprion = 2;
+	double price = 3;
+}
+message UpdateTestTypeRequest
+{
+	int32 id = 1;
+	string name = 2;
+	string descriprion = 3;
+	double price = 4;
+
+}
+message DeleteTestTypeRequest 
+{
+	int32 id = 1;
+}
+service TetstTypeProtoService
+{
+	rpc GetTypeTest(GetTestTypeRequest) returns (testtype)
+	{
+		option (google.api.http) = 
+		{
+				get:"/testtype/{id}"
+		};
+	
+	}
+	rpc ListTypeTest(google.protobuf.Empty) returns (TestTypeResponce)
+	{
+		option (google.api.http) = 
+		{
+				get:"/testtype"
+		};
+	}
+	rpc CreateTestType(CreateTestTypeRequest) returns(testtype)
+	{
+	option (google.api.http) = 
+		{
+				post:"/testtype",
+				body:"*"
+		};
+	}
+	rpc UpdateTestType(UpdateTestTypeRequest) returns(testtype)
+	{
+		option (google.api.http) = 
+		{
+				put:"/testtype",
+				body:"*"
+		};
+	}
+	rpc DeleteTesttype(DeleteTestTypeRequest) returns (google.protobuf.Empty)
+	{
+	option (google.api.http) = 
+		{
+				delete:"/testtype/{id}"
+		};
+	}
+}

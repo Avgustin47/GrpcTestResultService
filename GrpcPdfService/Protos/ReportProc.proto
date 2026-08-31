@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcPdfService.Protos";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+package reportrs;
+
+message reportrs
+{
+	int32 id = 1;
+	string usluga = 2;
+	string FioCLient = 3;
+	google.protobuf.Timestamp date = 4;
+
+}
+message RepotrsResponce
+{
+  repeated reportrs reports = 1;
+  
+}
+
+service gRPCRepotService
+{
+	rpc GetReports (google.protobuf.Empty) returns (reportrs); 
+}

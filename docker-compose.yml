@@ -1,0 +1,96 @@
+services:
+  grpcautharizationtservice:
+    image: ${DOCKER_REGISTRY-}grpcautharizationservice
+    build:
+      context: .
+      dockerfile: GrpcAutthorizationService/Dockerfile
+    ports:
+      - "5002:8080"
+    container_name: "my_grpc_auth_service"
+    depends_on:
+      - usersdb
+      - rabbitmq
+    environment:
+      - RabbitMQ__Host=amqp://rabbitmq:5672
+      - RabbitMQ__Username=admin
+      - RabbitMQ__Password=admin123
+
+  grpctestresultservice:
+    image: ${DOCKER_REGISTRY-}grpctestresultservice
+    build:
+      context: .
+      dockerfile: GrpcTestResultService/Dockerfile
+    ports:
+      - "5000:8080"
+    container_name: "my_grpc_service"
+    depends_on:
+      - db
+      - rabbitmq
+    environment:
+      - RabbitMQ__Host=amqp://rabbitmq:5672
+      - RabbitMQ__Username=admin
+      - RabbitMQ__Password=admin123
+
+  grpcpdfservice:
+    image: ${DOCKER_REGISTRY-}grpcprdfservice
+    build:
+      context: .
+      dockerfile: GrpcPdfService/Dockerfile
+    ports:
+      - "5001:8080"
+    container_name: "my_grpcpdf_service"
+    depends_on:
+      - rabbitmq
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMQ__Host=amqp://rabbitmq:5672
+      - RabbitMQ__Username=admin
+      - RabbitMQ__Password=admin123
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  db:
+    image: postgres:latest
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: qwerty
+      POSTGRES_DB: mydb
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    ports:
+      - "5431:5432"
+
+  usersdb:
+    image: postgres:latest
+    container_name: postgres_userdb
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: qwerty
+      POSTGRES_DB: myuserdb
+      PGDATA: /var/lib/postgresql/dataforusers
+    volumes:
+      - postgres_userdata:/var/lib/postgresql
+    ports:
+      - "2288:5432"
+
+volumes:
+  postgres_data:
+  postgres_userdata:

@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dd819d86-2895-4214-a5b7-daccc01aabe9</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Services\PdfSerivceClass.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Protos\ReportProc.proto" />
+  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Grpc.AspNetCore" Version="2.83.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.11" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.11">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="MongoDB.EntityFrameworkCore" Version="10.0.3" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.24.2-preview.1" />
+		<PackageReference Include="QuestPDF" Version="2026.8.0" />
+		<PackageReference Include="MassTransit" Version="8.5.9" />
+		<PackageReference Include="MassTransit.RabbitMQ" Version="8.5.9" />
+		<PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.3.1" />
+		<PackageReference Include="System.Drawing.Common" Version="10.0.11" />
+		<PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.83.0" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UserMqDto\UserMqDto.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\ReportProc.proto" GrpcServices="Server" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Entities\" />
+    <Folder Include="Model\" />
+  </ItemGroup>
+
+</Project>
