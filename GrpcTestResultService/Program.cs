@@ -6,12 +6,30 @@ using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddGrpcReflection();
 
-builder.Services.AddGrpc().AddJsonTranscoding();
+builder.Services.AddGrpc(opt =>
+{
+    opt.EnableDetailedErrors = true;
+   
+}).AddJsonTranscoding();
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .Enrich.WithMachineName()
+    .Enrich.WithThreadId()
+    .WriteTo.Console()
+    .WriteTo.File(
+    path: "logs/logs-.log",
+    rollingInterval: RollingInterval.Day,
+    retainedFileCountLimit: 7)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddDbContext<TestResultDbContext>(o => o.UseNpgsql("Host=db;Database=mydb;Username=user;Password=qwerty",
      npgsqlOptions =>
@@ -55,6 +73,7 @@ builder.Services.AddMassTransit(busConfigurate =>
 
     });
 });
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
@@ -64,7 +83,7 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<TestResultDbContext>();
     dbContext.Database.Migrate();
 }
-app.UseAuthentication(); 
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapGrpcReflectionService();
 
@@ -73,3 +92,4 @@ app.MapGrpcService<TestTypeService>();
 app.MapGet("/", () => "");
 
 app.Run();
+Log.CloseAndFlush();

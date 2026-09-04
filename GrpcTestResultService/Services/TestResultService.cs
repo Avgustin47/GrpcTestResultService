@@ -5,6 +5,7 @@ using GrpcTestResultService.Model;
 using GrpcTestResultService.Protos;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using UserMqDto;
 
 
@@ -29,37 +30,38 @@ namespace GrpcTestResultService.Services
             return Task.FromResult(reply);
         }
         [Authorize]
-        public override Task<TestResultResponce> ListTestResult(Empty request, ServerCallContext context)
+        public async override Task<TestResultResponce> ListTestResult(Empty request, ServerCallContext context)
         {
             var responce = new TestResultResponce();
-            var testresult = db.TestResults.Select(x => new testresult
+            var testresult = await db.TestResults.AsNoTracking().Select(x => new testresult
             {
                 Id = x.Id,
-                Date = Timestamp.FromDateTime(x.Date),
+                Date = Timestamp.FromDateTime(DateTime.SpecifyKind(x.Date,DateTimeKind.Utc)),
                 Description = x.Description,
                 TestType = x.TestTypeId
 
-            }).ToList();
+            }).ToListAsync(context.CancellationToken);
+                
             responce.Testresult.AddRange(testresult);
             if (responce.Testresult.Count == 0) throw new RpcException(new Status(StatusCode.NotFound, "no data"));
-            return Task.FromResult(responce);
+            return responce;
         }
         [Authorize (Roles ="admin")]
-        public override Task<testresult> CreateTestResult(CreateTestResultRequest request, ServerCallContext context)
+        public async override Task<testresult> CreateTestResult(CreateTestResultRequest request, ServerCallContext context)
         {
             var result = new TestResult
             {
-                Id = db.TestResults.Any() ? db.TestResults.Max(x => x.Id) + 1 : 1,
+                Id = await db.TestResults.AsNoTracking().AnyAsync() ? db.TestResults.Max(x => x.Id) + 1 : 1,
                 Date = DateTime.UtcNow,
                 Description = request.Description,
                 TestTypeId = request.TestType,
                 PatientId = request.PatientId
 
             };
-            db.TestResults.Add(result);
-            db.SaveChanges();
+            await db.TestResults.AddAsync(result,context.CancellationToken);
+           await db.SaveChangesAsync();
 
-            _publisher.Publish(new TestDto
+           await _publisher.Publish(new TestDto
             {
                 Id = result.Id,
                 IdClient = result.PatientId,
@@ -81,7 +83,7 @@ namespace GrpcTestResultService.Services
 
             };
 
-            return Task.FromResult(responce);
+            return await Task.FromResult(responce);
         }
 
         public override Task<testresult> UpdateTestResult(UpdateTestResultRequest request, ServerCallContext context)

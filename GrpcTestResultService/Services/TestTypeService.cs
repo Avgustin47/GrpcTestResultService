@@ -2,29 +2,32 @@
 using Grpc.Core;
 using GrpcTestResultService.Entities;
 using GrpcTestResultService.Model;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 
 
 namespace GrpcTestResultService.Services
 {
-    public class TestTypeService(TestResultDbContext context) : TetstTypeProtoService.TetstTypeProtoServiceBase
+    public class TestTypeService(TestResultDbContext context, ILogger<TestTypeService> logger) : TetstTypeProtoService.TetstTypeProtoServiceBase
     {
 
-        readonly TestResultDbContext db = context;
+        private readonly TestResultDbContext db = context;
+        private readonly ILogger<TestTypeService> logger = logger;
 
-        private class PubUser
-        {
-            public Guid Id { get; set; }
-            public required string Name { get; set; }
-
-        }
         public override Task<testtype> GetTypeTest(GetTestTypeRequest request, ServerCallContext context)
         {
+            logger.LogInformation("gRPC GetTypeTest вызван с id : {Id}", request.Id);
             var result = db.TestTypes.FirstOrDefault(x => x.Id == request.Id);
             if (result == null)
+            {
+                logger.LogWarning("Невалидные данные для ID :{Id}", request.Id);
                 throw new RpcException(new Status(StatusCode.NotFound, "Не найдено"));
+            }
             else
             {
+                logger.LogInformation("Данные успешно дайнены");
                 var reply = new testtype()
                 {
                     Id = result.Id,
@@ -45,18 +48,18 @@ namespace GrpcTestResultService.Services
                 Descriprion = x.Description,
                 Name = x.Name,
                 Price = x.Price
-            }).ToList();
+            }).Take(1).Skip(1).ToList();
             responce.Testtype.AddRange(typelist);
 
 
-            return await Task.FromResult(responce);
+            return responce;
         }
         public override async Task<testtype> CreateTestType(CreateTestTypeRequest request, ServerCallContext context)
         {
 
             var result = new TestType
             {
-                Id = db.TestTypes.Any() ? db.TestTypes.Max(x => x.Id) + 1 : 1,
+
                 Name = request.Name,
                 Description = request.Descriprion,
                 Price = request.Price
@@ -64,7 +67,7 @@ namespace GrpcTestResultService.Services
 
             await db.TestTypes.AddAsync(result);
 
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(context.CancellationToken);
 
 
             var reply = new testtype()
@@ -74,16 +77,16 @@ namespace GrpcTestResultService.Services
                 Price = result.Price,
                 Name = result.Name
             };
-            return await Task.FromResult(reply)!;
+            return reply;
         }
-        public override Task<testtype> UpdateTestType(UpdateTestTypeRequest request, ServerCallContext context)
+        public async override Task<testtype> UpdateTestType(UpdateTestTypeRequest request, ServerCallContext context)
         {
-            var result = db.TestTypes.FirstOrDefault(x => x.Id == request.Id);
-
-            result!.Name = request.Name;
+            var result = db.TestTypes.FirstOrDefault(x => x.Id == request.Id) 
+                ?? throw new RpcException(new Status(StatusCode.NotFound, "запись не найдена"));
+            result.Name = request.Name;
             result.Description = request.Descriprion;
             result.Price = request.Price;
-            db.SaveChanges();
+            await db.SaveChangesAsync();
             var reply = new testtype()
             {
                 Id = request.Id,
@@ -91,15 +94,15 @@ namespace GrpcTestResultService.Services
                 Descriprion = result.Description,
                 Price = result.Price
             };
-            return Task.FromResult(reply)!;
+            return reply;
         }
-        public override Task<Empty> DeleteTesttype(DeleteTestTypeRequest request, ServerCallContext context)
+        public override async Task<Empty> DeleteTesttype(DeleteTestTypeRequest request, ServerCallContext context)
         {
             var result = db.TestTypes.FirstOrDefault(x => x.Id == request.Id)
             ?? throw new RpcException(new Status(StatusCode.NotFound, "Ошибка удаления данных"));
             db.TestTypes.Remove(result);
-            db.SaveChanges();
-            return Task.FromResult(new Empty())!;
+            await db.SaveChangesAsync();
+            return new Empty();
         }
     }
 }

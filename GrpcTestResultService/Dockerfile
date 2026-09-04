@@ -7,6 +7,7 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+RUN mkdir -p /app/logs
 
 # Этот этап используется для сборки проекта службы
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build

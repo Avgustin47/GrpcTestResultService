@@ -7,6 +7,7 @@
     }
     public record TestDto
     {
+        
         public int Id { get; set; }
         public int IdClient { get; set; }
         public required string PatientName { get; set; }

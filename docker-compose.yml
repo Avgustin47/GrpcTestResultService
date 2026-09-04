@@ -27,9 +27,18 @@ services:
       - db
       - rabbitmq
     environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Serilog__MinimumLevel__Default=Information
+      - Serilog__MinimumLevel__Override__Microsoft=Warning
+      - Serilog__WriteTo__0__Name=Console
+      - Serilog__WriteTo__1__Name=File
+      - Serilog__WriteTo__1__Args__path=/app/logs/order-api-.log
+      - Serilog__WriteTo__1__Args__rollingInterval=Day
       - RabbitMQ__Host=amqp://rabbitmq:5672
       - RabbitMQ__Username=admin
       - RabbitMQ__Password=admin123
+    volumes:
+      - ./logs/order-api:/app/logs
 
   grpcpdfservice:
     image: ${DOCKER_REGISTRY-}grpcprdfservice
