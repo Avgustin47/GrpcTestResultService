@@ -24,19 +24,18 @@ services:
       - "5000:8080"
     container_name: "my_grpc_service"
     depends_on:
+      - redis
       - db
       - rabbitmq
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - Serilog__MinimumLevel__Default=Information
-      - Serilog__MinimumLevel__Override__Microsoft=Warning
-      - Serilog__WriteTo__0__Name=Console
-      - Serilog__WriteTo__1__Name=File
-      - Serilog__WriteTo__1__Args__path=/app/logs/order-api-.log
-      - Serilog__WriteTo__1__Args__rollingInterval=Day
       - RabbitMQ__Host=amqp://rabbitmq:5672
       - RabbitMQ__Username=admin
       - RabbitMQ__Password=admin123
+      - Redis__ConnectionString=redis:6379,password=qwerty,defaultDatabase=0
+      - Redis__InstanceName=TestResultServuce
+      - Redis__Enabled=true
+      - Serilog__MinimumLevel__Default=Information
     volumes:
       - ./logs/order-api:/app/logs
 
@@ -72,6 +71,16 @@ services:
       timeout: 10s
       retries: 5
 
+  redis:
+    image: redis:latest
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
+    environment: 
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    volumes:
+      - ./redis-data:/data  
   db:
     image: postgres:latest
     container_name: postgres_db

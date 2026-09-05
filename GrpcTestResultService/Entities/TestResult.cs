@@ -9,5 +9,6 @@
         public TestType? TestType { get; set; }
         public int PatientId { get; set; }
         public Patient? Patient { get; set; }
+        
     }
 }
