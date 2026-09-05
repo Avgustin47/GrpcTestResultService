@@ -76,9 +76,18 @@ services:
     container_name: redis-cache
     ports:
       - "6379:6379"
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
     environment: 
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - REDIS_PASSWORD=qwerty
+      - REDIS_ARGS=--appendonly yes --requirepass qwerty
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass qwerty
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000 
     volumes:
       - ./redis-data:/data  
   db:
