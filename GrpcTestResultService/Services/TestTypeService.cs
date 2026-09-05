@@ -28,7 +28,7 @@ namespace GrpcTestResultService.Services
                         var entity = await db.TestTypes.AsNoTracking().
                         FirstOrDefaultAsync(x => x.Id == request.Id, context.CancellationToken);
 
-                        if(entity == null)
+                        if (entity == null)
                         {
                             logger.LogWarning("запись с id {Id} не найден", request.Id);
                             throw new RpcException(new Status(StatusCode.NotFound, "не найдено"));
@@ -43,7 +43,7 @@ namespace GrpcTestResultService.Services
                     },
                     TimeSpan.FromMinutes(10),
                     context.CancellationToken);
-                    logger.LogInformation("Данные для id {Id} успешно возвращены", request.Id);
+                logger.LogInformation("Данные для id {Id} успешно возвращены", request.Id);
                 return reply;
             }
             catch (Exception ex) when (ex is not RpcException)
@@ -54,7 +54,7 @@ namespace GrpcTestResultService.Services
                 {
                     logger.LogWarning("Не валидные данные для ID :{Id}", request.Id);
                     throw new RpcException(new Status(StatusCode.NotFound, "Не найдено"));
-                    
+
                 }
                 else
                 {
@@ -70,7 +70,7 @@ namespace GrpcTestResultService.Services
                 }
             }
 
-            
+
 
         }
         public async override Task<TestTypeResponce> ListTypeTest(Empty request, ServerCallContext context)
@@ -82,7 +82,7 @@ namespace GrpcTestResultService.Services
                 Descriprion = x.Description,
                 Name = x.Name,
                 Price = x.Price
-            }).Take(1).Skip(1).ToList();
+            }).ToList();
             responce.Testtype.AddRange(typelist);
 
 
