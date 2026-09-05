@@ -3,11 +3,8 @@ using GrpcTestResultService.Model;
 using GrpcTestResultService.RmqServices;
 using GrpcTestResultService.Services;
 using MassTransit;
-using MassTransit.Caching;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
@@ -27,7 +24,7 @@ if (redisConfig.GetValue<bool>("Enabled", true))
     });
 
     var connectionString = redisConfig.GetValue<string>("ConnectionString");
-  
+
     var redisConnetion = ConnectionMultiplexer.Connect(connectionString!);
 
     builder.Services.AddSingleton<IConnectionMultiplexer>(redisConnetion);

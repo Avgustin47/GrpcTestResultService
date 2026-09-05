@@ -10,7 +10,8 @@
 
         public Task<T> GetAsync<T>(string key, CancellationToken cancellationToken = default)
         {
-            logger.LogDebug("NullCacheService: GetAsync для ключа {Key}", key);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("NullCacheService: GetAsync для ключа {Key}", key);
             return Task.FromResult(default(T))!;
         }
 
@@ -21,18 +22,21 @@
 
         public Task RemoveAsync(string key, CancellationToken cancellationToken = default)
         {
-            logger.LogDebug("NullCacheService: RemoveAsync для ключа {Key}", key);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("NullCacheService: RemoveAsync для ключа {Key}", key);
             return Task.CompletedTask;
         }
 
         public Task RemoveByPatternAsync(string pattern, CancellationToken cancellationToken = default)
         {
-            logger.LogDebug("NullCacheService: RemoveByPatternAsync для паттерна {Pattern}", pattern);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("NullCacheService: RemoveByPatternAsync для паттерна {Pattern}", pattern);
             return Task.CompletedTask;
         }
 
         public Task SetAsync<T>(string key, T value, TimeSpan? expiry = null, CancellationToken cancellationToken = default)
         {
+            if (logger.IsEnabled(LogLevel.Debug))
                 logger.LogDebug("NullCacheService: SetAsync для ключа {Key}", key);
             return Task.CompletedTask;
         }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
 using Serilog;
+using Serilog.Core;
 using System.Text.Json;
 
 namespace GrpcTestResultService.Caching
@@ -41,7 +42,8 @@ namespace GrpcTestResultService.Caching
                     return default!;
                 }
                 var result = JsonSerializer.Deserialize<T>(data, jsonoptions);
-                logger.LogInformation("Данные получены из кэша для ключа:{key}", key);
+                if (logger.IsEnabled(LogLevel.Information))
+                    logger.LogInformation("Данные получены из кэша для ключа:{key}", key);
                 return result!;
             }
             catch(Exception ex)
@@ -72,7 +74,8 @@ namespace GrpcTestResultService.Caching
             try
             {
                 await cache.RemoveAsync(key, cancellationToken);
-                logger.LogDebug("Ключ удален из кэша: {key}", key);
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Ключ удален из кэша: {key}", key);
             }
             catch (Exception ex)
             {
@@ -95,7 +98,8 @@ namespace GrpcTestResultService.Caching
                     AbsoluteExpirationRelativeToNow = expiry ?? TimeSpan.FromMinutes(5)
                 };
                 await cache.SetStringAsync(key, data, options, cancellationToken);
-                logger.LogDebug("Данные сохранены в кэш для ключа: {key}", key);
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Данные сохранены в кэш для ключа: {key}", key);
 
             }
             catch(Exception ex)
