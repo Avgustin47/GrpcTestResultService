@@ -1,4 +1,5 @@
 services:
+#микросервис для авторизации пользователей
   grpcautharizationtservice:
     image: ${DOCKER_REGISTRY-}grpcautharizationservice
     build:
@@ -14,7 +15,14 @@ services:
       - RabbitMQ__Host=amqp://rabbitmq:5672
       - RabbitMQ__Username=admin
       - RabbitMQ__Password=admin123
-
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - grpc-network
+#микросервис для результатов анализов
   grpctestresultservice:
     image: ${DOCKER_REGISTRY-}grpctestresultservice
     build:
@@ -38,7 +46,14 @@ services:
       - Serilog__MinimumLevel__Default=Information
     volumes:
       - ./logs/order-api:/app/logs
-
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3 
+    networks:
+      - grpc-network
+#микросервис генерации отчетов
   grpcpdfservice:
     image: ${DOCKER_REGISTRY-}grpcprdfservice
     build:
@@ -54,7 +69,14 @@ services:
       - RabbitMQ__Host=amqp://rabbitmq:5672
       - RabbitMQ__Username=admin
       - RabbitMQ__Password=admin123
-
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - grpc-network
+#брокер для передачи сообщений между микросервисами
   rabbitmq:
     image: rabbitmq:management
     container_name: rabbitmq
@@ -70,14 +92,17 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    networks:
+      - grpc-network
 
+    
+#редис для кэширования
   redis:
     image: redis:latest
     container_name: redis-cache
     ports:
       - "6379:6379"
     environment: 
-      - REDIS_PASSWORD=qwerty
       - REDIS_ARGS=--appendonly yes --requirepass qwerty
     command: >
       redis-server
@@ -90,6 +115,9 @@ services:
       --save 60 10000 
     volumes:
       - ./redis-data:/data  
+    networks:
+      - grpc-network
+   #база данных для медицинскийх тестов
   db:
     image: postgres:latest
     container_name: postgres_db
@@ -103,7 +131,9 @@ services:
       - postgres_data:/var/lib/postgresql
     ports:
       - "5431:5432"
-
+    networks:
+      - grpc-network
+#база данных для пользователей
   usersdb:
     image: postgres:latest
     container_name: postgres_userdb
@@ -117,7 +147,13 @@ services:
       - postgres_userdata:/var/lib/postgresql
     ports:
       - "2288:5432"
+    networks:
+      - grpc-network
 
 volumes:
   postgres_data:
   postgres_userdata:
+
+networks:
+  grpc-network:
+    driver: bridge

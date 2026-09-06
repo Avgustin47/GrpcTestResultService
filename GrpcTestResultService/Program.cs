@@ -13,7 +13,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
-
+builder.Services.AddHealthChecks();
 var redisConfig = builder.Configuration.GetSection("Redis");
 if (redisConfig.GetValue<bool>("Enabled", true))
 {
@@ -23,9 +23,9 @@ if (redisConfig.GetValue<bool>("Enabled", true))
         opt.InstanceName = redisConfig.GetValue<string>("InstanceName", "TestResultService");
     });
 
-    var connectionString = redisConfig.GetValue<string>("ConnectionString");
+    var connectionStringredis = redisConfig.GetValue<string>("ConnectionString");
 
-    var redisConnetion = ConnectionMultiplexer.Connect(connectionString!);
+    var redisConnetion = ConnectionMultiplexer.Connect(connectionStringredis!);
 
     builder.Services.AddSingleton<IConnectionMultiplexer>(redisConnetion);
 
@@ -59,8 +59,8 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Host.UseSerilog();
-
-builder.Services.AddDbContext<TestResultDbContext>(o => o.UseNpgsql("Host=db;Database=mydb;Username=user;Password=qwerty",
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<TestResultDbContext>(o => o.UseNpgsql(connectionString,
      npgsqlOptions =>
      {
          npgsqlOptions.EnableRetryOnFailure(
@@ -98,6 +98,10 @@ builder.Services.AddMassTransit(busConfigurate =>
             x.Password("admin123");
 
         });
+        configurator.UseMessageRetry(retryConfig =>
+        {
+            retryConfig.Interval(3, TimeSpan.FromSeconds(5));
+        });
         configurator.ConfigureEndpoints(context);
 
     });
@@ -107,15 +111,25 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+app.Lifetime.ApplicationStarted.Register(() =>
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<TestResultDbContext>();
-    dbContext.Database.Migrate();
-}
+    Log.Information("Application started successfully");
+});
+app.Lifetime.ApplicationStopping.Register(() =>
+{
+    Log.Information("Application is stopping...");
+  
+});
+app.Lifetime.ApplicationStopped.Register(() =>
+{
+    Log.Information("Application stopped");
+});
+
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapGrpcReflectionService();
-
+app.MapHealthChecks("/health");
 app.MapGrpcService<TestResultService>();
 app.MapGrpcService<TestTypeService>();
 app.MapGet("/", () => "");

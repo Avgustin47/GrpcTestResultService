@@ -12,8 +12,6 @@ namespace GrpcTestResultService.Services
     public class TestTypeService(TestResultDbContext db, ILogger<TestTypeService> logger, ICacheService cache) : TetstTypeProtoService.TetstTypeProtoServiceBase
     {
 
-
-
         public override async Task<testtype> GetTypeTest(GetTestTypeRequest request, ServerCallContext context)
         {
             var cachekey = $"order:{request.Id}";
@@ -77,18 +75,50 @@ namespace GrpcTestResultService.Services
         }
         public async override Task<TestTypeResponce> ListTypeTest(Empty request, ServerCallContext context)
         {
-            var responce = new TestTypeResponce();
-            var typelist = db.TestTypes.Select(x => new testtype
+            var cachekey = "testtype:list";
+            try
             {
-                Id = x.Id,
-                Descriprion = x.Description,
-                Name = x.Name,
-                Price = x.Price
-            }).ToList();
-            responce.Testtype.AddRange(typelist);
+                var cachedList = await cache.GetOrSetAsync(
+                    cachekey,
+                    async () =>
+                    {
+                        var entities = await db.TestTypes
+                        .AsNoTracking()
+                        .Select(x => new testtype
+                        {
+                            Id = x.Id,
+                            Name = x.Name,
+                            Descriprion = x.Description,
+                            Price = x.Price
+                        }).ToListAsync(context.CancellationToken);
+                        return entities;
+                    },
+                    TimeSpan.FromMinutes(5),
+                    context.CancellationToken
+                    );
+
+                var response = new TestTypeResponce();
+                response.Testtype.AddRange(cachedList);
+                return response;
+            }
+            catch (Exception ex) when (ex is not RpcException)
+            {
+                logger.LogWarning(ex, "Ошибка кэша для списка, выполняем прямой запрос к БД");
+                var entities = await db.TestTypes
+                    .AsNoTracking()
+                    .Select(x => new testtype
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                        Descriprion = x.Description,
+                        Price = x.Price
+                    }).ToListAsync(context.CancellationToken);
+                var response = new TestTypeResponce();
+                response.Testtype.AddRange(entities);
+                return response;
+            }
 
 
-            return responce;
         }
         public override async Task<testtype> CreateTestType(CreateTestTypeRequest request, ServerCallContext context)
         {
@@ -105,7 +135,7 @@ namespace GrpcTestResultService.Services
 
             await db.SaveChangesAsync(context.CancellationToken);
 
-
+            await cache.RemoveAsync("testtype:list", context.CancellationToken);
             var reply = new testtype()
             {
                 Id = result.Id,
@@ -119,10 +149,15 @@ namespace GrpcTestResultService.Services
         {
             var result = db.TestTypes.FirstOrDefault(x => x.Id == request.Id)
                 ?? throw new RpcException(new Status(StatusCode.NotFound, "запись не найдена"));
+
+
             result.Name = request.Name;
             result.Description = request.Descriprion;
             result.Price = request.Price;
             await db.SaveChangesAsync();
+
+            await cache.RemoveAsync($"testtype:{request.Id}", context.CancellationToken);
+            await cache.RemoveAsync("testtype:list", context.CancellationToken);
             var reply = new testtype()
             {
                 Id = request.Id,
@@ -136,8 +171,13 @@ namespace GrpcTestResultService.Services
         {
             var result = db.TestTypes.FirstOrDefault(x => x.Id == request.Id)
             ?? throw new RpcException(new Status(StatusCode.NotFound, "Ошибка удаления данных"));
+
             db.TestTypes.Remove(result);
             await db.SaveChangesAsync();
+
+            await cache.RemoveAsync($"testtype:{request.Id}", context.CancellationToken);
+            await cache.RemoveAsync("testtype:list", context.CancellationToken);
+
             return new Empty();
         }
     }

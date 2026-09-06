@@ -7,13 +7,13 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-RUN mkdir -p /app/logs
 
 # Этот этап используется для сборки проекта службы
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["GrpcTestResultService/GrpcTestResultService.csproj", "GrpcTestResultService/"]
+COPY ["UserMqDto/UserMqDto.csproj", "UserMqDto/"]
 RUN dotnet restore "./GrpcTestResultService/GrpcTestResultService.csproj"
 COPY . .
 WORKDIR "/src/GrpcTestResultService"
