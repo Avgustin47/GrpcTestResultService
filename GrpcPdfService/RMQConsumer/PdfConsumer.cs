@@ -1,30 +1,49 @@
 ﻿
+using GrpcPdfService.Repository;
 using GrpcPdfService.Services;
 using MassTransit;
 using UserMqDto;
 
 namespace GrpcPdfService.RMQConsumer
 {
-    public class PdfConsumer() : IConsumer<TestDto>
+    public class PdfConsumer(IPdfStorage storage, IPdfRepository repos, ILogger<PdfConsumer> logger) : IConsumer<TestDto>
     {
       
-
         public async Task Consume(ConsumeContext<TestDto> context)
         {
-            var test = new TestDto
+            var testdto = context.Message;
+            try
             {
-                Id = context.Message.Id,
-                Description = context.Message.Description,
-                IdClient = context.Message.IdClient,
-                Name = context.Message.Name,
-                TestDate = context.Message.TestDate,
-                PatientName = context.Message.PatientName,
-                Price = context.Message.Price
-            };
+                byte[] pdfBytes = ExpoxtResultPdf.Expoxt(testdto);
+                string fileName = $"Report_{testdto.Id}_{DateTime.UtcNow:yyyyMMdd}.pdf";
+                string storageKey = $"reports/client_{testdto.IdClient}/{fileName}";
 
-           ExpoxtResultPdf.Expoxt(test);
-            
-          
+                await storage.SaveAsync(storageKey, pdfBytes, context.CancellationToken);
+                var report = new Entities.Report {
+                    ClientId = testdto.IdClient,
+                    TestId = testdto.Id,
+                    FileName = fileName,
+                    StoragePath = storageKey,
+                    CreatedAt = DateTime.UtcNow,
+                    Status = "Completed"
+                };
+                await repos.AddAsync(report, context.CancellationToken);
+                logger.LogInformation("PDF сохранён для клиента {ClientId}, тест {TestId}", testdto.IdClient, testdto.Id);
+            }
+            catch (Exception ex)
+            {
+                var report = new Entities.Report
+                {
+                    ClientId = testdto.IdClient,
+                    TestId = testdto.Id,
+                   
+                    CreatedAt = DateTime.UtcNow,
+                    Status = "Failed"
+                };
+                await repos.AddAsync(report, context.CancellationToken);
+                logger.LogError(ex, "Ошибка генерации/сохранения PDF");
+            }
         }
     }
-}   
+}
+

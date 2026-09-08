@@ -14,7 +14,7 @@ namespace GrpcTestResultService.Services
 
         public override async Task<testtype> GetTypeTest(GetTestTypeRequest request, ServerCallContext context)
         {
-            var cachekey = $"order:{request.Id}";
+            var cachekey = $"testtype:{request.Id}";
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("gRPC GetTypeTest вызван с id : {Id}", request.Id);
 

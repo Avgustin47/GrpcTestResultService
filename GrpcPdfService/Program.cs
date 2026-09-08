@@ -1,7 +1,8 @@
-
+using GrpcPdfService.Model;
+using GrpcPdfService.Repository;
 using GrpcPdfService.RMQConsumer;
-using GrpcPdfService.Services;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
 
 
@@ -11,7 +12,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddGrpc();
 
 builder.Services.AddGrpcReflection();
-builder.Services.AddGrpcClient<PdfService>();
+builder.Services.AddDbContext<ReportDbContext>(opt =>
+{
+    opt.UseNpgsql("Host=reportdb;Database=reportdb;Username=user;Password=qwerty");
+});
+builder.Services.AddScoped<IPdfRepository, PdfReportRepository>();
+builder.Services.AddScoped<IPdfStorage, LocalFileStorage>();
 builder.Services.AddMassTransit(busConfigurate =>
 {
     busConfigurate.SetKebabCaseEndpointNameFormatter();
@@ -29,9 +35,14 @@ builder.Services.AddMassTransit(busConfigurate =>
 
     });
 });
+
 var app = builder.Build();
 
-app.MapGrpcReflectionService();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ReportDbContext>();
+    db.Database.Migrate();
+}
 
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 

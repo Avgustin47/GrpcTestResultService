@@ -51,7 +51,7 @@ namespace GrpcTestResultService.Services
         {
             var result = new TestResult
             {
-                Id = await db.TestResults.AsNoTracking().AnyAsync() ? db.TestResults.Max(x => x.Id) + 1 : 1,
+                
                 Date = DateTime.UtcNow,
                 Description = request.Description,
                 TestTypeId = request.TestType,

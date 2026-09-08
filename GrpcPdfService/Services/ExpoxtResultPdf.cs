@@ -6,7 +6,7 @@ namespace GrpcPdfService.Services
 {
     public static class ExpoxtResultPdf
     {
-        static public void Expoxt(TestDto TestDto)
+        static  public byte[] Expoxt(TestDto TestDto)
         {
             var document = Document.Create(container =>
             {
@@ -61,9 +61,10 @@ namespace GrpcPdfService.Services
                     });
             });
 
-            
-            string filename = "SalesReport.pdf";
-            document.GeneratePdf(filename);
+
+            using var stream = new MemoryStream();
+            document.GeneratePdf(stream);
+            return stream.ToArray();
         }
     }
 }

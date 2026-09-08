@@ -11,10 +11,6 @@
   <ItemGroup>
     <Compile Remove="Services\PdfSerivceClass.cs" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Protos\ReportProc.proto" />
-  </ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Grpc.AspNetCore" Version="2.83.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.11" />
@@ -22,9 +18,9 @@
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="MongoDB.EntityFrameworkCore" Version="10.0.3" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.24.2-preview.1" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
 		<PackageReference Include="QuestPDF" Version="2026.8.0" />
 		<PackageReference Include="MassTransit" Version="8.5.9" />
 		<PackageReference Include="MassTransit.RabbitMQ" Version="8.5.9" />
@@ -38,12 +34,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="Protos\ReportProc.proto" GrpcServices="Server" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Entities\" />
-    <Folder Include="Model\" />
+    <Folder Include="Protos\" />
+    <Folder Include="Reports\" />
   </ItemGroup>
 
 </Project>

@@ -14,7 +14,7 @@ namespace GrpcTestResultService.Extensions
                 configConsumer?.Invoke(busConfig);
                 busConfig.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.Host("rabbitMq", 5672, "/", h =>
+                    cfg.Host("rabbitmq", 5672, "/", h =>
                     {
                         h.Username("admin");
                         h.Password("admin123");

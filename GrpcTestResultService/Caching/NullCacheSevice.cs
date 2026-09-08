@@ -26,13 +26,7 @@
                 logger.LogDebug("NullCacheService: RemoveAsync для ключа {Key}", key);
             return Task.CompletedTask;
         }
-
-        public Task RemoveByPatternAsync(string pattern, CancellationToken cancellationToken = default)
-        {
-            if (logger.IsEnabled(LogLevel.Debug))
-                logger.LogDebug("NullCacheService: RemoveByPatternAsync для паттерна {Pattern}", pattern);
-            return Task.CompletedTask;
-        }
+     
 
         public Task SetAsync<T>(string key, T value, TimeSpan? expiry = null, CancellationToken cancellationToken = default)
         {

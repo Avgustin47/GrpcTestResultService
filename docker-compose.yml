@@ -149,11 +149,26 @@ services:
       - "2288:5432"
     networks:
       - grpc-network
-
+#база данных для отчетов
+  reportdb:
+    image: postgres:latest
+    container_name: postgres_reportsdb
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: qwerty
+      POSTGRES_DB: reportdb
+      PGDATA: /var/lib/postgresql/dataforusers
+    volumes:
+      - postgres_reportdata:/var/lib/postgresql
+    ports:
+      - "1234:5432"
+    networks:
+      - grpc-network
 volumes:
   postgres_data:
   postgres_userdata:
-
+  postgres_reportdata:
 networks:
   grpc-network:
     driver: bridge
