@@ -16,12 +16,37 @@ services:
       - RabbitMQ__Username=admin
       - RabbitMQ__Password=admin123
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
     networks:
       - grpc-network
+#микросервис нотификации 
+  notification-service:
+    image: ${DOCKER_REGISTRY-}notificationservice
+    build:
+      context: .
+      dockerfile: NotificationService/Dockerfile
+    ports:
+      - "5003:8080"
+    container_name: notification_service
+    depends_on:
+      - rabbitmq
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMQ__Host=amqp://rabbitmq:5672
+      - RabbitMQ__Username=admin
+      - RabbitMQ__Password=admin123
+      - Smtp__Host=smtp.yourprovider.com
+      - Smtp__Port=587
+      - Smtp__Username=user
+      - Smtp__Password=pass
+    networks:
+      - grpc-network
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
 #микросервис для результатов анализов
   grpctestresultservice:
     image: ${DOCKER_REGISTRY-}grpctestresultservice
@@ -47,7 +72,7 @@ services:
     volumes:
       - ./logs/order-api:/app/logs
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3 
@@ -70,7 +95,7 @@ services:
       - RabbitMQ__Username=admin
       - RabbitMQ__Password=admin123
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3

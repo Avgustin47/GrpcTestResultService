@@ -102,13 +102,13 @@ namespace GrpcTestResultService.Migrations
             modelBuilder.Entity("GrpcTestResultService.Entities.TestResult", b =>
                 {
                     b.HasOne("GrpcTestResultService.Entities.Patient", "Patient")
-                        .WithMany("testResults")
+                        .WithMany("TestResults")
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("GrpcTestResultService.Entities.TestType", "TestType")
-                        .WithMany("testResults")
+                        .WithMany("TestResults")
                         .HasForeignKey("TestTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -120,12 +120,12 @@ namespace GrpcTestResultService.Migrations
 
             modelBuilder.Entity("GrpcTestResultService.Entities.Patient", b =>
                 {
-                    b.Navigation("testResults");
+                    b.Navigation("TestResults");
                 });
 
             modelBuilder.Entity("GrpcTestResultService.Entities.TestType", b =>
                 {
-                    b.Navigation("testResults");
+                    b.Navigation("TestResults");
                 });
 #pragma warning restore 612, 618
         }

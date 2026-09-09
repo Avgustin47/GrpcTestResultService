@@ -29,6 +29,15 @@ namespace GrpcPdfService.RMQConsumer
                 };
                 await repos.AddAsync(report, context.CancellationToken);
                 logger.LogInformation("PDF сохранён для клиента {ClientId}, тест {TestId}", testdto.IdClient, testdto.Id);
+
+                await context.Publish(new PdfReportReadyEvent
+                {
+                    ClientId = testdto.IdClient,
+                    ReportId = report.Id,
+                    ReportName = $"Отчет по услуге #{testdto.Id}",
+                    StoragePath = storageKey,
+                    GeneratedAt = DateTime.UtcNow,
+                });
             }
             catch (Exception ex)
             {

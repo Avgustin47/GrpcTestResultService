@@ -3,7 +3,7 @@
     public class Report
     {
         public int Id { get; set; }
-        public int ClientId { get; set; }
+        public Guid ClientId { get; set; }
         public int TestId { get; set; }
         public  string? FileName { get; set; }
         public string?  StoragePath { get; set; }

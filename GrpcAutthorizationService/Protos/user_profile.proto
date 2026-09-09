@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcAutthorizationService.Protos";
+
+service UserProfileSerice{
+ rpc GetUserProfile(GetUserProfileRequest) returns (UserProfileResponce);
+}
+message GetUserProfileRequest{
+ string client_id =1;
+}
+message UserProfileResponce{
+ string client_id =1;
+ string email =2;
+ 
+}

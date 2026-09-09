@@ -1,3 +1,4 @@
+
 using GrpcTestResultService.Extensions;
 using GrpcTestResultService.RmqServices;
 using GrpcTestResultService.Services;
@@ -36,6 +37,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapGrpcReflectionService();
 app.MapHealthChecks("/health");
+
 app.MapGrpcService<TestResultService>();
 app.MapGrpcService<TestTypeService>();
 app.MapGet("/", () => "");

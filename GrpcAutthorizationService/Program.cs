@@ -63,7 +63,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-
+app.MapGrpcService<UserProfileServiceImp>();
 app.MapGrpcService<AuthJwtService>();
 if (app.Environment.IsDevelopment())
 {

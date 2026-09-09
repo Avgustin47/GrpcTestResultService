@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GrpcPdfService.Migrations
 {
     [DbContext(typeof(ReportDbContext))]
-    [Migration("20260907145924_Initial")]
+    [Migration("20260908175144_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -33,8 +33,8 @@ namespace GrpcPdfService.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ClientId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -43,7 +43,6 @@ namespace GrpcPdfService.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("FileName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Status")
@@ -51,7 +50,6 @@ namespace GrpcPdfService.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("StoragePath")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("TestId")

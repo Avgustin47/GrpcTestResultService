@@ -6,5 +6,6 @@
   <Project Path="GrpcAutthorizationService/GrpcAutthorizationService.csproj" />
   <Project Path="GrpcPdfService/GrpcPdfService.csproj" Id="633c72c9-a4c7-40b0-a347-7c3068a3f7b4" />
   <Project Path="GrpcTestResultService/GrpcTestResultService.csproj" />
+  <Project Path="NotificationService/NotificationService.csproj" Id="0e79a301-f13d-4f70-9cdf-cd3e47f4f17e" />
   <Project Path="UserMqDto/UserMqDto.csproj" />
 </Solution>

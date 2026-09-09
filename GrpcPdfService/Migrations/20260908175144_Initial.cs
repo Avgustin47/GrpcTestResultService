@@ -18,10 +18,10 @@ namespace GrpcPdfService.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ClientId = table.Column<int>(type: "integer", nullable: false),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     TestId = table.Column<int>(type: "integer", nullable: false),
-                    FileName = table.Column<string>(type: "text", nullable: false),
-                    StoragePath = table.Column<string>(type: "text", nullable: false),
+                    FileName = table.Column<string>(type: "text", nullable: true),
+                    StoragePath = table.Column<string>(type: "text", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
                     ErrorMessage = table.Column<string>(type: "text", nullable: true)

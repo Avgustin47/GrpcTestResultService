@@ -16,7 +16,8 @@ namespace GrpcPdfService.Repository
 
         public async Task<List<Report>> GetByClientidAsync(int clientId, CancellationToken cancellationToken)
         {
-            return await db.Reports.Where(x=>x.ClientId == clientId).AsNoTracking().ToListAsync();
+           //return await db.Reports.Where(x=>x.ClientId == clientId).AsNoTracking().ToListAsync(); 
+           throw new NotImplementedException();
         }
 
         public async Task<Report> GetByIdAsync(int id, CancellationToken cancellationToken = default)

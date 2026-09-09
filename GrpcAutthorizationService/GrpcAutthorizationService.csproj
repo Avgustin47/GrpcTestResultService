@@ -44,6 +44,7 @@
 
   <ItemGroup>
     <Protobuf Include="Protos\Auht.proto" GrpcServices="Server" />
+    <Protobuf Include="Protos\user_profile.proto" />
   </ItemGroup>
 
 </Project>

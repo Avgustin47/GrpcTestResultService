@@ -64,8 +64,8 @@ namespace GrpcTestResultService.Services
            await _publisher.Publish(new TestDto
             {
                 Id = result.Id,
-                IdClient = result.PatientId,
-                Description = result.Description,
+                IdClient = db.Patients.FirstOrDefault(x => x.Id == result.PatientId)!.IdClient,
+               Description = result.Description,
                 Name = db.TestTypes.FirstOrDefault(x => x.Id == result.TestTypeId)!.Name,
                 PatientName = db.Patients.FirstOrDefault(x => x.Id == result.PatientId)!.Name,
                 TestDate = result.Date,
